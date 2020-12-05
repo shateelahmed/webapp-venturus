@@ -5,7 +5,7 @@ const app = express();
 //mysql setting
 const connection = mysql.createConnection({
   host: 'localhost',
-  port: 3307,
+  port: 3306,
   user: 'docker',
   password: 'docker',
   database: 'test'
@@ -39,4 +39,4 @@ router.post('/api/postTest', (req, res) => {
 
 app.use(router)
 
-app.listen(3001, () => { console.log('Example app listening on port 3001!') })
+app.listen(8080, () => { console.log('Example app listening on port 8080!') })
