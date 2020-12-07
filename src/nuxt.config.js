@@ -42,7 +42,8 @@ export default {
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
   axios: {
-    proxy: true,
+    // proxy: true,
+    baseURL: 'http://localhost:8080/api',
   },
   proxy: {
     '/api/postTest': {

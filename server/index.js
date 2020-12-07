@@ -36,4 +36,6 @@ router.post('/api/postTest', function (req, res) {
     });
 });
 app.use(router);
-app.listen(8080, function () { console.log('Example app listening on port 8080!'); });
+
+const port = 8080;
+app.listen(port, function () { console.log(`Example app listening on port ${port}!`); });
