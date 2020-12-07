@@ -1,4 +1,8 @@
 export default {
+  server: {
+    port: 8000, // default: 3000
+    host: '0.0.0.0' // default: localhost
+  },
   // Disable server-side rendering (https://go.nuxtjs.dev/ssr-mode)
   ssr: true,
 
@@ -38,12 +42,13 @@ export default {
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
   axios: {
-    proxy: true,
+    // proxy: true,
+    baseURL: 'http://localhost:8080/api',
   },
   proxy: {
     '/api/postTest': {
       // ターゲット先のURLを指定
-      target: 'http://localhost:3001',
+      target: 'http://localhost:8080',
       changeOrigin: true,
       secure: false,
     },
