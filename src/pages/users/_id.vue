@@ -8,7 +8,7 @@
 export default {
   head(): any {
     return {
-      titleTemplate: `%s user ${this.user.name}`,
+      titleTemplate: `%s user`,
       title: ``,
     }
   },
@@ -17,10 +17,12 @@ export default {
   },
   async asyncData(context: any): Promise<object> {
     const user = await context.$axios.$get(`/users/${context.params.id}`)
+    const murmurs = await context.$axios.$get(`/users/${context.params.id}/murmurs`)
     // console.log(user);
 
     return {
-      user
+      user,
+      murmurs
     }
   },
 }

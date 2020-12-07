@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="header">
-      <h1>Murmurs</h1>
+      <h1>Murmurs of {{ user.name }}</h1>
     </div>
     <div v-for="murmur in murmurs" :key="murmur.id">
       <div class="card">
@@ -17,7 +17,7 @@
                 {{ murmur.user_name }}
               </nuxt-link>
             </span>
-            |<span>likes: {{ murmur.likes }}</span>
+            <span>likes {{ murmur.likes }}</span>
           </div>
           <div class="card-footer-actions">
             <nuxt-link :to="`/murmurs/${murmur.id}/like`">
@@ -39,18 +39,20 @@
 
 <script lang="ts">
 export default {
+  props: ['user'],
   head: {
-    title: 'murmurs',
+    title: 'murmurs of user',
   },
   data() {
     return {}
   },
-  async asyncData({ $axios }: { $axios:any }): Promise<object> {
-    const murmurs = await $axios.$get('/murmurs')
+  async asyncData(context: any): Promise<object> {
+    const murmurs = await context.$axios.$get(`/users/${context.params.id}/murmurs`)
     // console.log(murmurs);
 
     return {
-      murmurs
+      murmurs: murmurs,
+
     }
   },
 }

@@ -60,32 +60,79 @@ router.get('/api/users/seed', (req, res) => {
   }
   res.send(`Users seeded successfully!`)
 })
-router.get('/api/murmurs/seed', (req, res) => {
-  let usersQuery = `SELECT id FROM users;`
-  connection.query(usersQuery, function (err, results, fields) {
+router.get('/api/murmurs/delete', (req, res) => {
+  let deleteMurmursQuery = `DELETE FROM murmurs;`
+  connection.query(deleteMurmursQuery, function (err, results, fields) {
     if (err) throw err
-    let users = Object.values(JSON.parse(JSON.stringify(results)))
-    for (let i = 0; i <= users.length; i++) {
-      let user: any = users[i];
-      for (let j = 1; j <= 10; j++) {
-        let murmurQuery = `INSERT INTO murmurs (user_id, description) VALUES (${user.id}, 'Murmur ${j} of user ${user.id}')`;
-        connection.query(murmurQuery, function (err, results, fields) {
-          if (err) throw err
-        });
-      }
-    }
+    res.send(results)
   });
+})
+router.get('/api/murmurs/seed', (req, res) => {
+  for (let i = 1; i <= 11; i++) {
+    for (let j = 1; j <= 15; j++) {
+      let murmurQuery = `INSERT INTO murmurs (user_id, description) VALUES (${i}, 'Murmur ${j} of user ${i}')`;
+      connection.query(murmurQuery, function (err, results, fields) {
+        if (err) throw err
+      });
+    }
+  }
   res.send(`Murmurs seeded successfully!`)
 })
 router.get('/api/users', (req, res) => {
-  let query = `SELECT id, name, email FROM users;`
+  let query = `
+    SELECT
+      id,
+      name,
+      email,
+      (
+        SELECT  COUNT(*)
+        FROM    murmurs
+        WHERE   murmurs.user_id = users.id
+      ) AS murmurs,
+      (
+        SELECT  COUNT(*)
+        FROM    followers
+        WHERE   followers.user_id = users.id
+      ) AS followers,
+      (
+        SELECT  COUNT(*)
+        FROM    followers
+        WHERE   followers.follower_id = users.id
+      ) AS follows
+    FROM
+      users;
+  `
   connection.query(query, function (err, results, fields) {
     if (err) throw err
     res.send(results)
   });
 })
 router.get('/api/users/:id', (req, res) => {
-  let query = `SELECT id, name, email FROM users WHERE id = ?`
+  let query = `
+    SELECT
+      id,
+      name,
+      email,
+      (
+        SELECT  COUNT(*)
+        FROM    murmurs
+        WHERE   murmurs.user_id = users.id
+      ) AS murmurs,
+      (
+        SELECT  COUNT(*)
+        FROM    followers
+        WHERE   followers.user_id = users.id
+      ) AS followers,
+      (
+        SELECT  COUNT(*)
+        FROM    followers
+        WHERE   followers.follower_id = users.id
+      ) AS follows
+    FROM
+      users
+    WHERE
+      id = ?
+  `
   connection.query(query, [req.params.id], function (err, results, fields) {
     if (err) throw err
     let resultArray: Array<object> = Object.values(JSON.parse(JSON.stringify(results)))
@@ -98,6 +145,11 @@ router.get('/api/murmurs', (req, res) => {
     SELECT
       id,
       user_id,
+      (
+        SELECT  name
+        FROM    users
+        WHERE   users.id = murmurs.user_id
+      ) AS user_name,
       description,
       (
         SELECT  COUNT(*)
@@ -117,6 +169,11 @@ router.get('/api/murmurs/:id', (req, res) => {
     SELECT
       id,
       user_id,
+      (
+        SELECT  name
+        FROM    users
+        WHERE   users.id = murmurs.user_id
+      ) AS user_name,
       description,
       (
         SELECT  COUNT(*)
@@ -140,6 +197,11 @@ router.get('/api/users/:id/murmurs', (req, res) => {
     SELECT
       id,
       user_id,
+      (
+        SELECT  name
+        FROM    users
+        WHERE   users.id = murmurs.user_id
+      ) AS user_name,
       description,
       (
         SELECT  COUNT(*)
