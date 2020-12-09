@@ -17,13 +17,10 @@
           </ul>
           <ul class="navbar-nav mb-2 mb-lg-0" v-if="$auth.loggedIn">
             <li class="nav-item">
-              <nuxt-link class="nav-link" :to="`/users`">Users</nuxt-link>
-              <span class="navbar-text">
-                {{ $auth.user.email }}
-              </span>
+              <a class="nav-link" href="#">{{ $auth.user.email }}</a>
             </li>
             <li class="nav-item">
-              <nuxt-link class="nav-link" :to="`/logout`">Logout</nuxt-link>
+              <a class="nav-link" @click="$auth.logout()">Logout</a>
             </li>
           </ul>
           <ul class="navbar-nav mb-2 mb-lg-0" v-else>

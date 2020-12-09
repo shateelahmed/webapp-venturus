@@ -54,14 +54,6 @@ export default {
   //     secure: false,
   //   },
   // },
-  // proxy: {
-  //   '/api': {
-  //     target: 'http://localhost:8080',
-  //     pathRewrite: {
-  //       '^/api' : '/'
-  //       }
-  //     }
-  // },
   
   auth: {
     strategies: {
@@ -72,13 +64,13 @@ export default {
           type: 'Bearer'
         },
         user: {
-          // propertyName: false,
           property: false,
           autoFetch: true
         },
         endpoints: {
           login: { url: '/users/login', method: 'post' },
-          logout: { url: '/users/logout', method: 'post' },
+          // logout: { url: '/users/logout', method: 'post' },
+          logout: false,
           user: { url: '/users/me', method: 'get' }
         }
       }

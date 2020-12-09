@@ -63,12 +63,14 @@ export default {
 
       if (this.isEmpty(this.errors.email) && this.isEmpty(this.errors.password)) {
         console.log('Form submitted');
-        // try {
-        //   let response = await this.$auth.loginWith('local', { data: this.form })
-        //   console.log(response)
-        // } catch (err) {
-        //   console.log(err)
-        // }
+        try {
+          let response = await this.$auth.loginWith('local', {
+            data: this.form
+          })
+          console.log(response)
+        } catch (err) {
+          console.log(err)
+        }
         // const config = {
         //     headers: {
         //       'content-type': 'application/json',
@@ -76,23 +78,23 @@ export default {
         //     }
         // }
         // await this.$axios.$post('/users/login', this.form, config)
-        await this.$axios.$post('/users/login', this.form)
-          .then((res) => {
-            this.form.email = ''
-            this.form.password = ''
-            this.submitted = false
-            this.message.alertType = 'success'
-            this.message.text = 'Login successful'
-            // console.log('loggin', res.data)
-            console.log(res)
-            this.$auth.setUser(user)
-          })
-          .catch((err) => {
-            this.form.password = ''
-            // this.successMessage = err.response.data
-            this.message.alertType = 'danger'
-            this.message.text = err.response.data
-          })
+        // await this.$axios.$post('/users/login', this.form)
+        //   .then((res) => {
+        //     this.form.email = ''
+        //     this.form.password = ''
+        //     this.submitted = false
+        //     this.message.alertType = 'success'
+        //     this.message.text = 'Login successful'
+        //     // console.log('loggin', res.data)
+        //     console.log(res)
+        //     this.$auth.setUser(res)
+        //   })
+        //   .catch((err) => {
+        //     this.form.password = ''
+        //     // this.successMessage = err.response.data
+        //     this.message.alertType = 'danger'
+        //     this.message.text = err.response.data
+        //   })
 
         // console.log('done')
         // console.log(res)
