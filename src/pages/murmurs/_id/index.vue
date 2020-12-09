@@ -1,10 +1,10 @@
 <template>
   <div>
-    <h1>murmur</h1>
+    <h1>Murmur</h1>
     <div>
       Showing murmur {{ murmur.id }}
       <nuxt-link :to="`/murmurs/${murmur.id}/edit`">
-        <button>Edit</button>
+        <button class="btn btn-primary">Edit</button>
       </nuxt-link>
     </div>
   </div>

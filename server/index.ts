@@ -1,5 +1,7 @@
 import express from 'express'
 import mysql from 'mysql2'
+import bcrypt from 'bcrypt'
+import crypto, { verify } from 'crypto'
 const app = express();
 
 //mysql setting
@@ -30,9 +32,31 @@ app.use(express.urlencoded({ extended: true }))
 // `
 // Get example
 const router: express.Router = express.Router()
+app.use(router)
 
-router.get('/api/getTest', (req, res) => {
-  res.send(`query: ${req.query}`)
+router.get('/api/getTest', async (req, res) => {
+  res.send(req.query)
+  // const hashedPassword = await bcrypt.hash('321', 10)
+  // res.send(`${hashedPassword}`)
+  // let query = `UPDATE users SET password = '${hashedPassword}';`
+  // let query = `SELECT * FROM users`
+  // let query = `SELECT COUNT(DISTINCT(token)) AS count FROM users`
+  // let query = `ALTER TABLE users ADD UNIQUE (email);`
+  // let query = `ALTER TABLE users ADD UNIQUE (token);`
+  // let query = `ALTER TABLE users DROP INDEX email_2;`
+  // let query = `SHOW INDEXES IN users`
+  // connection.query(query, function (err, results, fields) {
+  //   if (err) throw err
+  //   res.send(results)
+  // });
+  // for (let i = 1; i <= 11; i++) {
+  //   let token = crypto.randomBytes(64).toString('hex')
+  //   let query = `UPDATE users SET token = '${token}' WHERE id = ${i}`;
+  //   connection.query(query, function (err, results, fields) {
+  //     if (err) throw err
+  //   });
+  // }
+  // res.send(`Tokens set successfully!`)
 })
 
 //Post example
@@ -51,6 +75,13 @@ router.get('/api/tables', (req, res) => {
     res.send(results)
   });
 })
+interface User {
+  id: number,
+  name: string,
+  email: string,
+  password: string,
+  token: string
+}
 router.get('/api/users/seed', (req, res) => {
   for (let i = 1; i <= 10; i++) {
     let query = `INSERT INTO users (name, email) VALUES ('user${i}', 'user${i}@mail.com')`;
@@ -59,6 +90,63 @@ router.get('/api/users/seed', (req, res) => {
     });
   }
   res.send(`Users seeded successfully!`)
+})
+router.post('/api/users/register', async (req, res) => {
+  let user = {
+    name: req.body.name,
+    email: req.body.email,
+    password: await bcrypt.hash(req.body.password, 10),
+    token: crypto.randomBytes(64).toString('hex')
+  }
+  // res.send(user)
+  // res.status(500).send('something went wrong')
+  let query = `
+    INSERT INTO users (name, email, password, token)
+    VALUES (?, ?, ?, ?)
+  `
+  let userArray = [user.name, user.email, user.password, user.token];
+  connection.query(query, userArray, function (err, results, fields) {
+    if (err) {
+      // res.status(500).send(err)
+      res.status(500).send('Something went wrong! Please try again.')
+    } else {
+      res.status(201).send('User registration successful. Please login.')  
+    }
+  });
+})
+router.post('/api/users/login', async (req, res) => {
+  let query = `
+    SELECT
+      id,
+      name,
+      email,
+      password,
+      token
+    FROM
+      users
+    WHERE
+      email = ?
+  `
+  connection.query(query, [req.body.email], async function (err, results, fields) {
+    if (err) throw err
+    let resultArray: Array<object> = Object.values(JSON.parse(JSON.stringify(results)))
+    if (resultArray.length <= 0) {
+      res.status(404).send('User not found!')
+    }
+    
+    let user = resultArray[0] as User
+    try {
+      if (await bcrypt.compare(req.body.password, user.password)) {
+        user.password = ''
+        res.send(user)
+      } else {
+        res.status(401).send('Unauthorized')
+      }
+    } catch {
+      res.status(500).send()
+    }
+    // res.send(user)
+  });
 })
 router.get('/api/murmurs/delete', (req, res) => {
   let deleteMurmursQuery = `DELETE FROM murmurs;`
@@ -77,6 +165,86 @@ router.get('/api/murmurs/seed', (req, res) => {
     }
   }
   res.send(`Murmurs seeded successfully!`)
+})
+function verifyToken(req: any, res: any, next: any) {
+  const authHeader = req.headers['authorization']
+  const token = authHeader && authHeader.split(" ")[1]
+  if (token == null) {
+    return res.sendStatus(401)
+  }
+  let query = `
+    SELECT
+      id,
+      name,
+      email,
+      token,
+      (
+        SELECT  COUNT(*)
+        FROM    murmurs
+        WHERE   murmurs.user_id = users.id
+      ) AS murmurs,
+      (
+        SELECT  COUNT(*)
+        FROM    followers
+        WHERE   followers.user_id = users.id
+      ) AS followers,
+      (
+        SELECT  COUNT(*)
+        FROM    followers
+        WHERE   followers.follower_id = users.id
+      ) AS follows
+    FROM
+      users
+    WHERE
+    token = ?
+  `
+  connection.query(query, [token], function (err, results, fields) {
+    if (err) throw err
+    let resultArray: Array<object> = Object.values(JSON.parse(JSON.stringify(results)))
+    if (resultArray.length === 0) {
+      res.sendStatus(401)
+    }
+    let user = resultArray[0] as User
+    req.user = user
+    next()
+  });
+
+}
+router.get('/api/users/me', verifyToken, (req, res) => {
+  const authHeader = req.headers['authorization']
+  const token = authHeader && authHeader.split(" ")[1]
+  let query = `
+    SELECT
+      id,
+      name,
+      email,
+      token,
+      (
+        SELECT  COUNT(*)
+        FROM    murmurs
+        WHERE   murmurs.user_id = users.id
+      ) AS murmurs,
+      (
+        SELECT  COUNT(*)
+        FROM    followers
+        WHERE   followers.user_id = users.id
+      ) AS followers,
+      (
+        SELECT  COUNT(*)
+        FROM    followers
+        WHERE   followers.follower_id = users.id
+      ) AS follows
+    FROM
+      users
+    WHERE
+    token = ?
+  `
+  connection.query(query, [token], function (err, results, fields) {
+    if (err) throw err
+    let resultArray: Array<object> = Object.values(JSON.parse(JSON.stringify(results)))
+    let user: object = resultArray[0]
+    res.send(user)
+  });
 })
 router.get('/api/users', (req, res) => {
   let query = `
@@ -218,7 +386,6 @@ router.get('/api/users/:id/murmurs', (req, res) => {
   });
 })
 
-app.use(router)
 
 const port = 8080;
 app.listen(port, () => { console.log(`Example app listening on port ${port}!`) })
