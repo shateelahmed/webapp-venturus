@@ -1,5 +1,9 @@
 <template>
   <div>
+    <div v-if="this.message.text" :class="'alert alert-fixed alert-dismissible fade show alert-'+this.message.alertType" role="alert">
+      {{ this.message.text }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     <h1>Details of {{ user.name }}</h1>
     <div class="card">
       <div class="card-body">
@@ -19,32 +23,19 @@
             Followers: <span class="badge bg-success">{{ user.followers }}</span>
             Follows: <span class="badge bg-success">{{ user.follows }}</span>
           </div>
-          <div class="col float-right">
-            <nuxt-link :to="`/users/${user.id}/follow`">
-              <button class="btn btn-success btn-sm">Follow</button>
-            </nuxt-link>
-          </div>
+          <div class="col">
+              <div v-if="$auth.loggedIn">
+                <button class="btn btn-success btn-sm" v-if="user.id != $auth.user.id" @click="followUser(user.id)">Follow</button>
+              </div>
+              <div v-else>
+                <nuxt-link :to="`/login`">
+                  <button class="btn btn-success btn-sm">Follow</button>
+                </nuxt-link>
+              </div>
+            </div>
         </div>
       </div>
     </div>
-        <!-- <div class="card-footer-info">
-          <span>
-            Murmurs 
-            <nuxt-link :to="`/users/${user.id}/murmurs`">
-              {{ user.murmurs }}
-            </nuxt-link>
-          </span>
-          |<span>Followers: {{ user.followers }}</span>
-          |<span>Follows: {{ user.follows }}</span>
-        </div>
-        <div class="card-footer-actions">
-          <nuxt-link :to="`/users/${user.id}/follow`">
-            <button class="like-button">Follow</button>
-          </nuxt-link>
-        </div> -->
-    <!-- <nuxt-link :to="`/users/${user.id}/edit`">
-      <button>Edit</button>
-    </nuxt-link> -->
     <h1>Murmurs of {{ user.name }}</h1>
     <div v-for="murmur in murmurs" :key="murmur.id">
       <div class="card mt-3">
@@ -55,23 +46,27 @@
           <div class="row">
             <div class="col">
               <span class="author">
-                by: 
+                <i class="fas fa-user"></i> 
                 <nuxt-link class="btn btn-link btn-sm" :to="`/users/${murmur.user_id}`">
                   {{ murmur.user_name }}
                 </nuxt-link>
               </span>
-              likes: <span class="badge bg-success">{{ murmur.likes }}</span>
+              <i class="fas fa-heart"></i> <span class="badge bg-success">{{ murmur.likes }}</span>
+              <i class="fas fa-clock"></i> {{ murmur.likes }}
             </div>
-            <div class="col float-right">
-              <nuxt-link :to="`/murmurs/${murmur.id}/like`">
-                <button class="btn btn-success btn-sm">Like</button>
-              </nuxt-link>
-              <nuxt-link :to="`/murmurs/${murmur.id}/edit`">
-                <button class="btn btn-primary btn-sm">Edit</button>
-              </nuxt-link>
-              <nuxt-link :to="`/murmurs/${murmur.id}/delete`">
-                <button class="btn btn-danger btn-sm">Delete</button>
-              </nuxt-link>
+            <div class="col">
+              <div class="div" v-if="$auth.loggedIn">
+                <button class="btn btn-success btn-sm" v-if="murmur.user_id != $auth.user.id" @click="likeMurmur(murmur.id)">Like</button>
+                <nuxt-link :to="`/murmurs/${murmur.id}/edit`" v-if="murmur.user_id == $auth.user.id">
+                  <button class="btn btn-primary btn-sm">Edit</button>
+                </nuxt-link>
+                <button class="btn btn-danger btn-sm" v-if="murmur.user_id == $auth.user.id" @click="deleteMurmur(murmur.id)">Delete</button>
+              </div>
+              <div class="div" v-else>
+                <nuxt-link :to="`/login`">
+                  <button class="btn btn-success btn-sm">Like</button>
+                </nuxt-link>
+              </div>
             </div>
           </div>
         </div>
@@ -80,22 +75,52 @@
   </div>
 </template>
 
-<script lang="ts">
+<script>
 export default {
   props: ['user'],
   head: {
     title: `Show`
   },
   data() {
-    return {}
+    return {
+      message: {
+        alertType: '',
+        text: '',
+      },
+    }
   },
-  async asyncData(context: any): Promise<object> {
+  // async asyncData(context: any): Promise<object> {
+  async asyncData(context) {
     const murmurs = await context.$axios.$get(`/users/${context.params.id}/murmurs`)
     // console.log(murmurs);
 
     return {
       murmurs: murmurs,
 
+    }
+  },
+  methods: {
+    async followUser(user_id) {
+      await this.$axios.$post(`/users/${user_id}/follow`)
+        .then((res) => {
+          this.message.alertType = 'success'
+          this.message.text = res
+        })
+        .catch((err) => {
+          this.message.alertType = 'danger'
+          this.message.text = err.response.data
+        })
+    },
+    async unfollowUser(user_id) {
+      await this.$axios.$post(`/users/${user_id}/unfollow`)
+        .then((res) => {
+          this.message.alertType = 'success'
+          this.message.text = res
+        })
+        .catch((err) => {
+          this.message.alertType = 'danger'
+          this.message.text = err.response.data
+        })
     }
   },
 }

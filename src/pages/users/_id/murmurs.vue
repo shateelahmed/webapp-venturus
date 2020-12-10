@@ -10,23 +10,27 @@
           <div class="row">
             <div class="col">
               <span class="author">
-                by: 
+                <i class="fas fa-user"></i> 
                 <nuxt-link class="btn btn-link btn-sm" :to="`/users/${murmur.user_id}`">
                   {{ murmur.user_name }}
                 </nuxt-link>
               </span>
-              likes: <span class="badge bg-success">{{ murmur.likes }}</span>
+              <i class="fas fa-heart"></i> <span class="badge bg-success">{{ murmur.likes }}</span>
+              <i class="fas fa-clock"></i> {{ murmur.likes }}
             </div>
-            <div class="col float-right">
-              <nuxt-link :to="`/murmurs/${murmur.id}/like`">
-                <button class="btn btn-success btn-sm">Like</button>
-              </nuxt-link>
-              <nuxt-link :to="`/murmurs/${murmur.id}/edit`">
-                <button class="btn btn-primary btn-sm">Edit</button>
-              </nuxt-link>
-              <nuxt-link :to="`/murmurs/${murmur.id}/delete`">
-                <button class="btn btn-danger btn-sm">Delete</button>
-              </nuxt-link>
+            <div class="col">
+              <div class="div" v-if="$auth.loggedIn">
+                <button class="btn btn-success btn-sm" v-if="murmur.user_id != $auth.user.id" @click="likeMurmur(murmur.id)">Like</button>
+                <nuxt-link :to="`/murmurs/${murmur.id}/edit`" v-if="murmur.user_id == $auth.user.id">
+                  <button class="btn btn-primary btn-sm">Edit</button>
+                </nuxt-link>
+                <button class="btn btn-danger btn-sm" v-if="murmur.user_id == $auth.user.id" @click="deleteMurmur(murmur.id)">Delete</button>
+              </div>
+              <div class="div" v-else>
+                <nuxt-link :to="`/login`">
+                  <button class="btn btn-success btn-sm">Like</button>
+                </nuxt-link>
+              </div>
             </div>
           </div>
         </div>
