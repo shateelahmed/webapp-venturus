@@ -23,19 +23,25 @@ INSERT INTO users (
 CREATE TABLE murmurs (
   id int NOT NULL AUTO_INCREMENT primary key,
   user_id int NOT NULL,
-  description varchar(255)
+  description varchar(255),
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL
 );
 
 CREATE TABLE followers (
   id int NOT NULL AUTO_INCREMENT primary key,
   user_id int NOT NULL,
-  follower_id int NOT NULL
+  follower_id int NOT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL
 );
 
 CREATE TABLE likes (
   id int NOT NULL AUTO_INCREMENT primary key,
   user_id int NOT NULL,
-  murmur_id int NOT NULL
+  murmur_id int NOT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL
 );
 
 -- CREATE TABLE test (
