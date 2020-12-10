@@ -2,9 +2,9 @@
   <div>
     <h1>User</h1>
     <div>
-      Editing {{ user.name }}
+      Editing user {{ user.name }}
       <nuxt-link :to="`/users/${user.id}`">
-        <button>Go back to show</button>
+        <button class="btn btn-primary">Go back to show</button>
       </nuxt-link>
     </div>
   </div>

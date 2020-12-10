@@ -4,6 +4,7 @@
 
 
 *.zip
+*.rest
 
 .DS_Store
 .env.development.local
