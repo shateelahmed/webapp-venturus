@@ -4,43 +4,17 @@
       {{ this.message.text }}
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    <h1>Users</h1>
-    <div v-for="user in users" :key="user.id">
-      <div class="card mt-3">
-        <div class="card-body">
-          <nuxt-link class="btn btn-link" :to="`/users/${user.id}`">{{ user.name }}</nuxt-link>
-          Email: {{ user.email }}
-        </div>
-        <div class="card-footer">
-          <div class="row">
-            <div class="col">
-              <span class="author">
-                Murmurs 
-                <nuxt-link :to="`/users/${user.id}/murmurs`">
-                  {{ user.murmurs }}
-                </nuxt-link>
-              </span>
-              Followers: <span class="badge bg-success">{{ user.followers }}</span>
-              Follows: <span class="badge bg-success">{{ user.follows }}</span>
-            </div>
-            <div class="col">
-              <div v-if="$auth.loggedIn">
-                <button class="btn btn-success btn-sm" v-if="user.id != $auth.user.id" @click="followUser(user.id)">Follow</button>
-              </div>
-              <div v-else>
-                <nuxt-link :to="`/login`">
-                  <button class="btn btn-success btn-sm">Follow</button>
-                </nuxt-link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Users
+      :users="users"
+      :followUser="followUser"
+      :unfollowUser="unfollowUser"
+    />
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import Users from '../components/Users';
+
 export default {
   head: {
     title: 'Users',

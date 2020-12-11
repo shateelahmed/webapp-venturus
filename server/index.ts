@@ -219,7 +219,6 @@ function verifyToken(req: any, res: any, next: any) {
     req.user = user
     next()
   });
-
 }
 router.get('/api/users/me', verifyToken, (req, res) => {
   const authHeader = req.headers['authorization']
@@ -568,6 +567,56 @@ router.post('/api/murmurs/:id/unlike', verifyToken, (req, res) => {
     });
   });
 })
+router.post('/api/murmurs/:id/liked', verifyToken, (req, res) => {
+  const authHeader = req.headers['authorization']
+  const token = authHeader && authHeader.split(" ")[1]
+  let query = `
+    SELECT
+      id,
+      name,
+      email,
+      password,
+      token
+    FROM
+      users
+    WHERE
+      token = ?
+  `
+  connection.query(query, [token], function (err, results, fields) {
+    if (err) {
+      // throw err
+      return res.status(500).send('Somethin went wrong!')
+    }
+    let resultArray: Array<object> = Object.values(JSON.parse(JSON.stringify(results)))
+    let user = resultArray[0] as User
+    // return res.send(user)
+    query = `SELECT id, user_id, description FROM murmurs WHERE id = ?`
+    connection.query(query, [req.params.id], function (err, results, fields) {
+      if (err) {
+        // throw err
+        return res.status(500).send('Somethin went wrong!')
+      }
+      
+      resultArray = Object.values(JSON.parse(JSON.stringify(results)))
+      if (resultArray.length === 0) {
+        return res.status(404).send('Murmur not found!')
+      }
+      let murmur = resultArray[0] as Murmur
+      let query = `SELECT * FROM likes WHERE user_id = ? AND murmur_id = ?`;
+      connection.query(query, [user.id, murmur.id], function (err, results, fields) {
+        if (err) {
+          // throw err
+          return res.status(500).send('Somethin went wrong!')
+        }
+        resultArray = Object.values(JSON.parse(JSON.stringify(results)))
+        if (resultArray.length === 0) {
+          return res.send('N')
+        }
+        return res.send('Y')
+      })
+    });
+  });
+})
 router.post('/api/murmurs/:id/delete', verifyToken, (req, res) => {
   const authHeader = req.headers['authorization']
   const token = authHeader && authHeader.split(" ")[1]
@@ -616,6 +665,97 @@ router.post('/api/murmurs/:id/delete', verifyToken, (req, res) => {
       });
     });
   });
+})
+router.get('/api/timeline', (req, res) => {
+  const authHeader = req.headers['authorization']
+  const token = authHeader && authHeader.split(" ")[1]
+  if (token == null) {
+    let query = `
+      SELECT
+        id,
+        user_id,
+        (
+          SELECT  name
+          FROM    users
+          WHERE   users.id = murmurs.user_id
+        ) AS user_name,
+        description,
+        (
+          SELECT  COUNT(*)
+          FROM    likes
+          WHERE   likes.murmur_id = murmurs.id
+        ) AS likes,
+        created_at,
+        updated_at
+      FROM
+        murmurs
+      ORDER BY
+        updated_at DESC
+    `
+    connection.query(query, function (err, results, fields) {
+      if (err) {
+        // throw err
+        return res.status(500).send('Somethin went wrong!')
+      }
+      return res.send(results)
+    });
+  } else {
+    let query = `
+      SELECT
+        id,
+        name,
+        email,
+        password,
+        token
+      FROM
+        users
+      WHERE
+        token = ?
+    `
+    connection.query(query, [token], function (err, results, fields) {
+      if (err) {
+        // throw err
+        return res.status(500).send('Somethin went wrong!')
+      }
+      let resultArray: Array<object> = Object.values(JSON.parse(JSON.stringify(results)))
+      if (resultArray.length === 0) {
+        return res.status(401).send('Unauthorized!')
+      }
+      
+      let user = resultArray[0] as User
+      query = `
+        SELECT
+          id,
+          user_id,
+          (
+            SELECT  name
+            FROM    users
+            WHERE   users.id = murmurs.user_id
+          ) AS user_name,
+          description,
+          (
+            SELECT  COUNT(*)
+            FROM    likes
+            WHERE   likes.murmur_id = murmurs.id
+          ) AS likes,
+          created_at,
+          updated_at
+        FROM
+          murmurs
+        WHERE
+          user_id IN (SELECT user_id FROM followers WHERE follower_id = ?)
+        ORDER BY
+          updated_at DESC
+      `
+      connection.query(query, [user.id], function (err, results, fields) {
+        if (err) {
+          // throw err
+          return res.status(500).send('Somethin went wrong!')
+        }
+        return res.send(results)
+      });
+    });
+  }
 })
 router.get('/api/users/me/murmurs', verifyToken, (req, res) => {
   const authHeader = req.headers['authorization']
@@ -841,6 +981,67 @@ router.post('/api/users/:id/unfollow', verifyToken, (req, res) => {
           }
           return res.status(200).send('User unfollowed successfully.')
         });
+      })
+    });
+  });
+})
+router.post('/api/users/:id/following', verifyToken, (req, res) => {
+  const authHeader = req.headers['authorization']
+  const token = authHeader && authHeader.split(" ")[1]
+  let query = `
+    SELECT
+      id,
+      name,
+      email,
+      password,
+      token
+    FROM
+      users
+    WHERE
+      token = ?
+  `
+  connection.query(query, [token], function (err, results, fields) {
+    if (err) {
+      // throw err
+      return res.status(500).send('Somethin went wrong!')
+    }
+    let resultArray: Array<object> = Object.values(JSON.parse(JSON.stringify(results)))
+    let follower = resultArray[0] as User
+    // return res.send(user)
+    query = `
+      SELECT
+        id,
+        name,
+        email,
+        password,
+        token
+      FROM
+        users
+      WHERE
+        id = ?
+    `
+    connection.query(query, [req.params.id], function (err, results, fields) {
+      if (err) {
+        // throw err
+        return res.status(500).send('Somethin went wrong!')
+      }
+      
+      resultArray = Object.values(JSON.parse(JSON.stringify(results)))
+      if (resultArray.length === 0) {
+        return res.status(404).send('User not found!')
+      }
+      let user = resultArray[0] as User
+      let query = `SELECT * FROM followers WHERE user_id = ? AND follower_id = ?`;
+      connection.query(query, [user.id, follower.id], function (err, results, fields) {
+        if (err) {
+          // throw err
+          return res.status(500).send('Somethin went wrong!')
+        }
+        resultArray = Object.values(JSON.parse(JSON.stringify(results)))
+        if (resultArray.length === 0) {
+          return res.send('N')
+        }
+        return res.send('Y')
       })
     });
   });
