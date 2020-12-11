@@ -12,6 +12,7 @@
 
 <script lang="ts">
 export default {
+  middleware: 'auth',
   props: ['murmur'],
   head: {
     title: `Edit`
