@@ -1,8 +1,8 @@
 <template>
   <div class="card mt-3">
     <div class="card-body">
-      <nuxt-link class="btn btn-link" :to="`/users/${user.id}`">{{ user.name }}</nuxt-link>
-      Email: {{ user.email }}
+      <i class="fas fa-user"></i> <nuxt-link class="btn btn-link" :to="`/users/${user.id}`">{{ user.name }}</nuxt-link><br>
+      <i class="fas fa-envelope"></i> {{ user.email }}
     </div>
     <div class="card-footer">
       <div class="row">
@@ -16,6 +16,7 @@
         <div class="col">
           <div v-if="$auth.loggedIn">
             <button class="btn btn-success btn-sm" v-if="user.id != $auth.user.id" @click="followUser(user.id)">Follow</button>
+            <button class="btn btn-warning btn-sm" v-if="user.id != $auth.user.id" @click="unfollowUser(user.id)">Unfollow</button>
           </div>
           <div v-else>
             <nuxt-link :to="`/login`">

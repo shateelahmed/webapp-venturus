@@ -4,6 +4,7 @@
       <Murmur
         :murmur="murmur"
         :likeMurmur="likeMurmur"
+        :unlikeMurmur="unlikeMurmur"
         :deleteMurmur="deleteMurmur"
       />
     </div>
@@ -21,6 +22,6 @@
     data() {
       return {}
     },
-    props: ["murmurs", "likeMurmur", "deleteMurmur"]
+    props: ["murmurs", "likeMurmur", "unlikeMurmur", "deleteMurmur"]
   }
 </script>

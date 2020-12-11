@@ -25,13 +25,13 @@
     <Murmurs
       :murmurs="murmurs"
       :likeMurmur="likeMurmur"
+      :unlikeMurmur="unlikeMurmur"
       :deleteMurmur="deleteMurmur"
     />
   </div>
 </template>
 
 <script>
-import moment from 'moment';
 import Murmurs from '../components/Murmurs';
 
 export default {
@@ -98,8 +98,9 @@ export default {
     },
     async likeMurmur(murmur_id) {
       await this.$axios.$post(`/murmurs/${murmur_id}/like`)
-        .then((res) => {
+        .then(async (res) => {
           this.setMessage('success', res)
+          this.murmurs = await this.$axios.$get('/murmurs')
         })
         .catch((err) => {
           this.setMessage('danger', err.response.data)
@@ -107,8 +108,9 @@ export default {
     },
     async unlikeMurmur(murmur_id) {
       await this.$axios.$post(`/murmurs/${murmur_id}/unlike`)
-        .then((res) => {
+        .then(async (res) => {
           this.setMessage('success', res)
+          this.murmurs = await this.$axios.$get('/murmurs')
         })
         .catch((err) => {
           this.setMessage('danger', err.response.data)
@@ -130,10 +132,6 @@ export default {
       this.message.alertType = alertType
       this.message.text = text
     }
-    // async getHumanDate(date) {
-    //   date = new Date(date);
-    //   return moment(date).format('DD/MM/YYYY');
-    // }
   },
 }
 </script>

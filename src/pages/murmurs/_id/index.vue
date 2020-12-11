@@ -19,17 +19,12 @@
               </nuxt-link>
             </span>
             <i class="fas fa-heart"></i> <span class="badge bg-success">{{ murmur.likes }}</span>
-            <i class="fas fa-clock"></i> some date
-            <nuxt-link :to="`/murmurs/${murmur.id}`">
-              <button class="btn btn-info btn-sm">View</button>
-            </nuxt-link>
+            <i class="fas fa-clock"></i> <span>{{ murmur.updated_at_f }}</span>
           </div>
           <div class="col">
             <div class="div" v-if="$auth.loggedIn">
               <button class="btn btn-success btn-sm" v-if="murmur.user_id != $auth.user.id" @click="likeMurmur(murmur.id)">Like</button>
-              <nuxt-link :to="`/murmurs/${murmur.id}/edit`" v-if="murmur.user_id == $auth.user.id">
-                <button class="btn btn-primary btn-sm">Edit</button>
-              </nuxt-link>
+              <button class="btn btn-warning btn-sm" v-if="murmur.user_id != $auth.user.id" @click="unlikeMurmur(murmur.id)">Unlike</button>
               <button class="btn btn-danger btn-sm" v-if="murmur.user_id == $auth.user.id" @click="deleteMurmur(murmur.id)">Delete</button>
             </div>
             <div class="div" v-else>
@@ -44,7 +39,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script>
 export default {
   props: ['murmur'],
   head: {
@@ -82,7 +77,7 @@ export default {
         await this.$axios.$post(`/murmurs/${murmur_id}/delete`)
           .then(async (res) => {
             this.setMessage('success', res)
-            this.murmurs = await this.$axios.$get('/murmurs')
+            this.$router.push('/me/murmurs')
           })
           .catch((err) => {
             this.setMessage('danger', err.response.data)

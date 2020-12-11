@@ -1,7 +1,7 @@
 import express from 'express'
 import mysql from 'mysql2'
 import bcrypt from 'bcrypt'
-import crypto, { verify } from 'crypto'
+import crypto from 'crypto'
 const app = express();
 
 //mysql setting
@@ -25,12 +25,6 @@ app.use((req, res, next) => {
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-// const query = `SELECT * from users`;
-// const query = `INSERT INTO murmurs (user_id, description) VALUES ((SELECT id FROM users WHERE name = 'shateel' LIMIT 1), 'Murmur 2')`
-// const query = `
-//   select * from murmurs;
-// `
-// Get example
 const router: express.Router = express.Router()
 app.use(router)
 
@@ -55,14 +49,6 @@ router.get('/api/getTest', async (req, res) => {
   //   if (err) throw err
   //   return res.send(results)
   // });
-  // for (let i = 1; i <= 11; i++) {
-  //   let token = crypto.randomBytes(64).toString('hex')
-  //   let query = `UPDATE users SET token = '${token}' WHERE id = ${i}`;
-  //   connection.query(query, function (err, results, fields) {
-  //     if (err) throw err
-  //   });
-  // }
-  // return res.send(`Tokens set successfully!`)
 })
 
 //Post example
@@ -391,8 +377,8 @@ router.get('/api/murmurs', (req, res) => {
         FROM    likes
         WHERE   likes.murmur_id = murmurs.id
       ) AS likes,
-      created_at,
-      updated_at
+      DATE_FORMAT(created_at,'%M %e, %Y @ %h:%i %p') AS created_at,
+      DATE_FORMAT(updated_at,'%M %e, %Y @ %h:%i %p') AS updated_at_f
     FROM
       murmurs
     ORDER BY
@@ -419,8 +405,8 @@ router.get('/api/murmurs/:id', (req, res) => {
         FROM    likes
         WHERE   likes.murmur_id = murmurs.id
       ) AS likes,
-      created_at,
-      updated_at
+      DATE_FORMAT(created_at,'%M %e, %Y @ %h:%i %p') AS created_at,
+      DATE_FORMAT(updated_at,'%M %e, %Y @ %h:%i %p') AS updated_at_f
     FROM
       murmurs
     WHERE
@@ -553,7 +539,7 @@ router.post('/api/murmurs/:id/unlike', verifyToken, (req, res) => {
         }
         resultArray = Object.values(JSON.parse(JSON.stringify(results)))
         if (resultArray.length === 0) {
-          return res.status(422).send('User has not liked this murmur!')
+          return res.status(422).send('You have not liked this murmur!')
         }
         query = `DELETE FROM likes WHERE user_id = ? AND murmur_id = ?`
         connection.query(query, [user.id, murmur.id], function (err, results, fields) {
@@ -685,8 +671,8 @@ router.get('/api/timeline', (req, res) => {
           FROM    likes
           WHERE   likes.murmur_id = murmurs.id
         ) AS likes,
-        created_at,
-        updated_at
+        DATE_FORMAT(created_at,'%W, %M %e, %Y @ %h:%i %p') AS created_at,
+        DATE_FORMAT(updated_at,'%M %e, %Y @ %h:%i %p') AS updated_at_f
       FROM
         murmurs
       ORDER BY
@@ -738,8 +724,8 @@ router.get('/api/timeline', (req, res) => {
             FROM    likes
             WHERE   likes.murmur_id = murmurs.id
           ) AS likes,
-          created_at,
-          updated_at
+          DATE_FORMAT(created_at,'%M %e, %Y @ %h:%i %p') AS created_at,
+          DATE_FORMAT(updated_at,'%M %e, %Y @ %h:%i %p') AS updated_at_f
         FROM
           murmurs
         WHERE
@@ -795,8 +781,8 @@ router.get('/api/users/me/murmurs', verifyToken, (req, res) => {
           FROM    likes
           WHERE   likes.murmur_id = murmurs.id
         ) AS likes,
-        created_at,
-        updated_at
+        DATE_FORMAT(created_at,'%M %e, %Y @ %h:%i %p') AS created_at,
+        DATE_FORMAT(updated_at,'%M %e, %Y @ %h:%i %p') AS updated_at_f
       FROM
         murmurs
       WHERE
@@ -829,8 +815,8 @@ router.get('/api/users/:id/murmurs', (req, res) => {
         FROM    likes
         WHERE   likes.murmur_id = murmurs.id
       ) AS likes,
-      created_at,
-      updated_at
+      DATE_FORMAT(created_at,'%M %e, %Y @ %h:%i %p') AS created_at,
+      DATE_FORMAT(updated_at,'%M %e, %Y @ %h:%i %p') AS updated_at_f
     FROM
       murmurs
     WHERE
@@ -971,7 +957,7 @@ router.post('/api/users/:id/unfollow', verifyToken, (req, res) => {
         }
         resultArray = Object.values(JSON.parse(JSON.stringify(results)))
         if (resultArray.length === 0) {
-          return res.status(422).send('User has not followed the other other user!')
+          return res.status(422).send('You are not following this user!')
         }
         query = `DELETE FROM followers WHERE user_id = ? AND follower_id = ?`
         connection.query(query, [user.id, follower.id], function (err, results, fields) {

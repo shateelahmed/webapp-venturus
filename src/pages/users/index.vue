@@ -12,8 +12,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import Users from '../components/Users';
+<script>
+import Users from '../../components/Users';
 
 export default {
   head: {
@@ -39,25 +39,27 @@ export default {
   methods: {
     async followUser(user_id) {
       await this.$axios.$post(`/users/${user_id}/follow`)
-        .then((res) => {
-          this.message.alertType = 'success'
-          this.message.text = res
+        .then(async (res) => {
+          this.setMessage('success', res)
+          this.users = await this.$axios.$get('/users')
         })
         .catch((err) => {
-          this.message.alertType = 'danger'
-          this.message.text = err.response.data
+          this.setMessage('danger', err.response.data)
         })
     },
     async unfollowUser(user_id) {
       await this.$axios.$post(`/users/${user_id}/unfollow`)
-        .then((res) => {
-          this.message.alertType = 'success'
-          this.message.text = res
+        .then(async (res) => {
+          this.setMessage('success', res)
+          this.users = await this.$axios.$get('/users')
         })
         .catch((err) => {
-          this.message.alertType = 'danger'
-          this.message.text = err.response.data
+          this.setMessage('danger', err.response.data)
         })
+    },
+    async setMessage(alertType, text) {
+      this.message.alertType = alertType
+      this.message.text = text
     }
   },
 }

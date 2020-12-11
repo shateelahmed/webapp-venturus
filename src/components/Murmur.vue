@@ -13,8 +13,7 @@
             </nuxt-link>
           </span>
           <i class="fas fa-heart"></i> <span class="badge bg-success">{{ murmur.likes }}</span>
-          <!-- <i class="fas fa-clock"></i> {{ getHumanDate(murmur.updated_at) }} -->
-          <i class="fas fa-clock"></i> some date
+          <i class="fas fa-clock"></i> <span>{{ murmur.updated_at_f }}</span>
           <nuxt-link :to="`/murmurs/${murmur.id}`">
             <button class="btn btn-info btn-sm">View</button>
           </nuxt-link>
@@ -22,6 +21,7 @@
         <div class="col">
           <div class="div" v-if="$auth.loggedIn">
             <button class="btn btn-success btn-sm" v-if="murmur.user_id != $auth.user.id" @click="likeMurmur(murmur.id)">Like</button>
+            <button class="btn btn-warning btn-sm" v-if="murmur.user_id != $auth.user.id" @click="unlikeMurmur(murmur.id)">Unlike</button>
             <!-- <nuxt-link :to="`/murmurs/${murmur.id}/edit`" v-if="murmur.user_id == $auth.user.id">
               <button class="btn btn-primary btn-sm">Edit</button>
             </nuxt-link> -->
@@ -45,7 +45,7 @@ export default {
     return {
     }
   },
-  props: ["murmur", "likeMurmur", "deleteMurmur"],
+  props: ["murmur", "likeMurmur", "unlikeMurmur", "deleteMurmur"],
   // async asyncData({ $axios }) {
   //   const liked = await $axios.$get(`/murmurs/${this.murmur.id}/liked`)
   //   console.log(liked);

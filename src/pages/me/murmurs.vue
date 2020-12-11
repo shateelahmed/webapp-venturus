@@ -16,6 +16,7 @@
 <script>
 import Murmur from '../../components/Murmur';
 export default {
+  middleware: 'auth',
   props: ['user'],
   head: {
     title: 'murmurs of user',
@@ -41,8 +42,9 @@ export default {
   methods: {
     async likeMurmur(murmur_id) {
       await this.$axios.$post(`/murmurs/${murmur_id}/like`)
-        .then((res) => {
+        .then(async (res) => {
           this.setMessage('success', res)
+          this.murmurs = await this.$axios.$get('/users/me/murmurs')
         })
         .catch((err) => {
           this.setMessage('danger', err.response.data)
@@ -50,8 +52,9 @@ export default {
     },
     async unlikeMurmur(murmur_id) {
       await this.$axios.$post(`/murmurs/${murmur_id}/unlike`)
-        .then((res) => {
+        .then(async (res) => {
           this.setMessage('success', res)
+          this.murmurs = await this.$axios.$get('/users/me/murmurs')
         })
         .catch((err) => {
           this.setMessage('danger', err.response.data)
@@ -62,7 +65,7 @@ export default {
         await this.$axios.$post(`/murmurs/${murmur_id}/delete`)
           .then(async (res) => {
             this.setMessage('success', res)
-            this.murmurs = await this.$axios.$get('/murmurs')
+            this.murmurs = await this.$axios.$get('/users/me/murmurs')
           })
           .catch((err) => {
             this.setMessage('danger', err.response.data)
