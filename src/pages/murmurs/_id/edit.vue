@@ -1,10 +1,10 @@
 <template>
   <div>
-    <h1>murmur</h1>
+    <h1>Murmur</h1>
     <div>
-      Editing {{ murmur.id }}
+      Editing murmum {{ murmur.id }}
       <nuxt-link :to="`/murmurs/${murmur.id}`">
-        <button>Go back to show</button>
+        <button class="btn btn-primary">Go back to show</button>
       </nuxt-link>
     </div>
   </div>
@@ -12,6 +12,7 @@
 
 <script lang="ts">
 export default {
+  middleware: 'auth',
   props: ['murmur'],
   head: {
     title: `Edit`

@@ -37,7 +37,8 @@ export default {
   modules: [
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
-    '@nuxtjs/proxy',
+    // '@nuxtjs/proxy',
+    '@nuxtjs/auth-next'
   ],
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
@@ -45,13 +46,35 @@ export default {
     // proxy: true,
     baseURL: 'http://localhost:8080/api',
   },
-  proxy: {
-    '/api/postTest': {
-      // ターゲット先のURLを指定
-      target: 'http://localhost:8080',
-      changeOrigin: true,
-      secure: false,
-    },
+  // proxy: {
+  //   '/api/postTest': {
+  //     // ターゲット先のURLを指定
+  //     target: 'http://localhost:8080',
+  //     changeOrigin: true,
+  //     secure: false,
+  //   },
+  // },
+  
+  auth: {
+    strategies: {
+      local: {
+        token: {
+          property: 'token',
+          // required: true,
+          type: 'Bearer'
+        },
+        user: {
+          property: false,
+          autoFetch: true
+        },
+        endpoints: {
+          login: { url: '/users/login', method: 'post' },
+          // logout: { url: '/users/logout', method: 'post' },
+          logout: false,
+          user: { url: '/users/me', method: 'get' }
+        }
+      }
+    }
   },
 
   // Build Configuration (https://go.nuxtjs.dev/config-build)

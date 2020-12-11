@@ -1,23 +1,38 @@
 <template>
   <div>
-    <div id="navbar">
-      <div class="navbar-links">
-        <nuxt-link :to="`/`">Home</nuxt-link>
-        <nuxt-link :to="`/users`">Users</nuxt-link>
-        <nuxt-link :to="`/murmurs`">Murmurs</nuxt-link>
-      </div>
-    </div>
-    <div id="container">
+    <Navbar />
+    <div class="container">
       <nuxt />
     </div>
-    <!-- <footer>
-        footer
-    </footer> -->
   </div>
 </template>
 
 <script lang="ts">
+import Navbar from '../components/Navbar.vue';
+
 export default {
+  head() {
+    return {
+      link: [
+        {
+          rel: 'stylesheet',
+          href: 'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css'
+        },
+        {
+          rel: 'stylesheet',
+          href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css'
+        }
+      ],
+      script: [
+        {
+          src: 'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js'
+        }
+      ],
+    }
+  },
+  components: {
+    Navbar
+  },
   data() {
     return {}
   },
@@ -25,29 +40,21 @@ export default {
 </script>
 
 <style>
-  *,
-  *:before,
-  *:after {
-    box-sizing: border-box;
-    margin: 0;
+  body {
+    padding-top: 70px;
   }
-  #navbar {
-    height: 40px;
-    width: 100%;
-    background-color: #333;
+  .card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   }
-  #navbar a {
-    color: white;
-    text-decoration: none;
-    margin-right: 10px;
+  .card:hover {
+    box-shadow: 0 0 0 1px rgba(3, 252, 144, 0.2), 0 6px 20px 0 rgba(3, 252, 144, 0.19);
+    transition: all 200ms ease-out;
   }
-  .navbar-links {
-    max-width: 800px;
-    margin: auto;
+  .alert-fixed {
+    z-index: 2000;
+    position: fixed;
+    width: fit-content(20em);
+    top: 80px;
+    right: 20px;
   }
-  #container {
-    max-width: 800px;
-    margin: auto;
-  }
-
 </style>

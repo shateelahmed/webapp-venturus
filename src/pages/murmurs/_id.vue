@@ -6,9 +6,9 @@
 
 <script lang="ts">
 export default {
-  head() {
+  head(): any {
     return {
-      titleTemplate: `%s murmur ${this.murmur.id}`,
+      titleTemplate: `%s murmur`,
       title: ``,
     }
   },
